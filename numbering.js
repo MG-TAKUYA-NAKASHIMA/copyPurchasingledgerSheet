@@ -1,7 +1,9 @@
-//「採番用シート」で使用するスクリプト
+//「請求書（明細別）データ入力」で使用するスクリプト
+// 仕入先台帳から最新の仕入先codeを引っ張ってきている部分のスクリプトは未作成
+
 
 //「【入力シート】請求書(明細別)」シートの「カスタムID未割当者抽出」ボタンを押すと実行する
-function triger() {
+function exportTriger() {
 	let unNumberingData = searchUnnumberedPerson();
 	unNumberingData     = deleateDuplicate(unNumberingData);
 	let formatedData    = formatData(unNumberingData);
