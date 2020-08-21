@@ -5,30 +5,60 @@
 //「カスタムID未採番者リスト」のデータを合わせて
 //すべての人に仕入先code(カスタムID)を採番したデータを作成する
 function reflectTriger() {
-const mergeData = generateMergeData();
-exportMergeData(mergeData);
+	let formatedData = getFormatedData();
+	formatedData.shift();
+	const mergeData = generateMergeData(formatedData);
+	mergeData.shift();
+	exportMergeData(mergeData);
+	exportFormateData(formatedData);
 }
 
-function generateMergeData() {
-	let valueOfInputData        = getInputDataInNumbering().getDataRange().getValues();
-	let formatedData            = getUnnumberingPersonSheetInNumbering().getDataRange().getValues();
+function getFormatedData() {
+	let formatedData = getUnnumberingPersonSheetInNumbering().getDataRange().getValues();
+	formatedData.shift().shift();
+	return formatedData;
+}
 
-	for(let i = 2; valueOfInputData.length > i; i++) {
-		if(valueOfInputData[i][13] === '') {
-			for(let j = 2; formatedData.length > j; j++) {
-				if(valueOfInputData[i][12] === formatedData[j][0]) {
-					valueOfInputData[i][13] = formatedData[j][1];
+function generateMergeData(formatedData) {
+	let valueOfInputData = getInputDataInNumbering().getDataRange().getValues();
+
+	for (let i = 2; valueOfInputData.length > i; i++) {
+		if (valueOfInputData[i][13] === '') {
+			for (let j = 0; formatedData.length > j; j++) {
+				if (valueOfInputData[i][12] === formatedData[j][1]) {
+					valueOfInputData[i][13] = formatedData[j][2];
 				}
 			}
 		}
 	}
-	valueOfInputData.shift();
-	valueOfInputData.shift();
+	valueOfInputData.shift().shift();
 	return valueOfInputData;
 }
 
 //「【出力シート】請求書(明細別)」シートへ貼付
 function exportMergeData(mergeData) {
 	const outputDataInNumbering = getOutputDataInNumbering();
-	outputDataInNumbering.getRange(3,1,mergeData.length,mergeData[0].length).setValues(mergeData);
+	outputDataInNumbering.getRange(3, 1, mergeData.length, mergeData[0].length).setValues(mergeData);
+}
+
+function exportFormateData(formatedData) {
+	const supplierLedgerSheet = getSupplierLedgerSheet();
+	let valueOfSupplierLedgerSheet = supplierLedgerSheet.getDataRange().getValues();
+	let tmp;
+
+
+	formatedData.forEach(arr => {
+		arr.shift();
+		tmp = arr[0];
+		arr.push(tmp);
+		arr.shift();
+	});
+
+	valueOfSupplierLedgerSheet.some((arr,i) => {
+		if(arr[2] === formatedData[0][0] ) {
+			supplierLedgerSheet.insertRows(i+2,formatedData.length);
+			supplierLedgerSheet.getRange(i+1,3,formatedData.length,2).setValues(formatedData);
+			return true;
+		}
+	})
 }

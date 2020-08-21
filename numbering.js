@@ -6,12 +6,13 @@
 function exportTriger() {
 	let unNumberingData = searchUnnumberedPerson();
 	unNumberingData     = deleateDuplicate(unNumberingData);
-	let formatedData    = formatData(unNumberingData);
+	let latestCustomId  = findLatestCustomId();
+	let formatedData    = formatData(unNumberingData,latestCustomId);
 	exportUunumberingData(formatedData);
 }
 
 
-//「【入力シート】請求書(明細別)」に貼り付けられたデータのからカスタムID未採番者を特定する
+//「【入力シート】請求書(明細別)」に貼り付けられたデータの中からカスタムID未採番者を特定する
 function searchUnnumberedPerson() {
 	const valueOfInputData = getInputDataInNumbering().getDataRange().getValues();
 	let unNumberingData    = [];
@@ -37,18 +38,41 @@ function deleateDuplicate(unNumberingData) {
 	return unNumberingData;
 }
 
-//「pasture表示名(請求元)」だけ抜き出す
-function formatData(unNumberingData) {
+//「pasture表示名(請求元)」だけ抜き出し、加工する
+function formatData(unNumberingData,latestCustomId) {
+	let tmp          = [];
 	let formatedData = [];
+	
 	for (let i = 0; unNumberingData.length > i; i++) {
-		formatedData.push([unNumberingData[i][12]]);
+		tmp.push(unNumberingData[i][11]);
+		tmp.push(unNumberingData[i][12]);
+		tmp.push(latestCustomId);
+		formatedData.push(tmp);
+		tmp = [];
+		latestCustomId++;
 	}
-
 	return formatedData;
 }
 
 //「カスタムID未採番者リスト」シートに貼付を行う
 function exportUunumberingData(formatedData) {
 	const unnumberingPersonSheetInNumbering = getUnnumberingPersonSheetInNumbering();
-	unnumberingPersonSheetInNumbering.getRange(3,1,formatedData.length,1).setValues(formatedData);
+	unnumberingPersonSheetInNumbering.getRange(3,1,formatedData.length,3).setValues(formatedData);
 }
+
+//「仕入先台帳」から最新の空き番号を取得する
+function findLatestCustomId() {
+	const supplierLedgerSheet        = getSupplierLedgerSheet();
+	const valueOfsupplierLedgerSheet = supplierLedgerSheet.getDataRange().getValues();
+	let latestCustomId;
+
+	valueOfsupplierLedgerSheet.some(arr => {
+		if(arr[1] === 0){
+			latestCustomId = arr[2];
+			return true;
+		}
+	});
+	return latestCustomId;
+}
+
+ 
