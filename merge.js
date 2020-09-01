@@ -54,10 +54,12 @@ function exportFormateData(formatedData) {
 		arr.shift();
 	});
 
-	valueOfSupplierLedgerSheet.some((arr,i) => {
-		if(arr[2] === formatedData[0][0] ) {
+	Logger.log(formatedData);
+
+	valueOfSupplierLedgerSheet.some((arr, i, self) => {
+		if(self[i][2] === formatedData[0][0] - 1 ) {
 			supplierLedgerSheet.insertRows(i+2,formatedData.length);
-			supplierLedgerSheet.getRange(i+1,3,formatedData.length,2).setValues(formatedData);
+			supplierLedgerSheet.getRange(i+2,3,formatedData.length,2).setValues(formatedData);
 			return true;
 		}
 	})

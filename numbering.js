@@ -66,9 +66,9 @@ function findLatestCustomId() {
 	const valueOfsupplierLedgerSheet = supplierLedgerSheet.getDataRange().getValues();
 	let latestCustomId;
 
-	valueOfsupplierLedgerSheet.some(arr => {
-		if(arr[1] === 0){
-			latestCustomId = arr[2];
+	valueOfsupplierLedgerSheet.some((arr, i, self)=> {
+		if(typeof self[i][1] == 'number' && self[i][1] === 0){
+			latestCustomId = self[i - 1][2] + 1;
 			return true;
 		}
 	});
