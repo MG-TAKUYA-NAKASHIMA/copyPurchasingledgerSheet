@@ -34,6 +34,7 @@ function generateNumberedList() {
 for(let i = 0; numberedList.length > i; i++) {
 	unNumberingList.push(numberedList[i]);
 }
+  Logger.log(unNumberingList);
 return unNumberingList;
 
 }
@@ -44,9 +45,15 @@ function generateMergeData(unNumberingList) {
 	for (let i = 2; valueOfInputData.length > i; i++) {
 		if (valueOfInputData[i][13] == '') {
 			for (let j = 0; unNumberingList.length > j; j++) {
-				if (valueOfInputData[i][12] == unNumberingList[j][1]) {
+              if(unNumberingList[j].length == 2 ){
+               if (valueOfInputData[i][12] == unNumberingList[j][1]) {
 					valueOfInputData[i][13] = unNumberingList[j][0];
-				} 
+				}
+              }else if(unNumberingList[j].length == 3){
+				if (valueOfInputData[i][12] == unNumberingList[j][1]) {
+					valueOfInputData[i][13] = unNumberingList[j][2];
+				}
+              }
 			}
 		}
 	}
