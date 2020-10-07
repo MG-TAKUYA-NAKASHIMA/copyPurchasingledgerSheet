@@ -1,9 +1,9 @@
 // 請求書（明細別）データ入力で使用するスクリプト
-//仕入先台帳への記入部分は未作成
 
 //「【入力シート】請求書(明細別)」のデータと
 //「カスタムID未採番者リスト」のデータを合わせて
 //すべての人に仕入先code(カスタムID)を採番したデータを作成する
+//3,1,44はマジックナンバーなので修正
 function reflectTriger() {
 	const outputDataInNumbering = getOutputDataInNumbering();
 	let lastRow = outputDataInNumbering.getLastRow();
@@ -30,7 +30,13 @@ function generateNumberedList() {
 	exportFormateData(unNumberingList);
 	exportNumberedSheet(unNumberingList);
 
-
+//unNumberungList=「カスタムID未採番者リスト」に出力されていたもの
+//numberedList=「採番済みリスト」に出力されていたもの
+//上記の2つの2次元配列の構成の構成がおかしいが時間的問題で修正を行っていない
+//→generateMergeData関数でのforとifの入れ子につながっている
+//unNumberungList = [カスタムID,pasture表示氏名]
+//numberedList= [請求元ID,pasture表示氏名,カスタムID]
+//また配列の変数名を修正したい。
 for(let i = 0; numberedList.length > i; i++) {
 	unNumberingList.push(numberedList[i]);
 }
@@ -39,6 +45,9 @@ return unNumberingList;
 
 }
 
+//「カスタムID未採番者」シートと「採番済み」シートという2つのシートから採番されていない人を読み込んでいる
+//forとifの入れ子は改善しなければいけないが、時間的な制約により修正できていない(原因は上記関数のコメントを参照)
+//なので配列要素数でunNumberungListに由来するのか、numberedListに由来するのかを判別させている。
 function generateMergeData(unNumberingList) {
 	let valueOfInputData = getInputDataInNumbering().getDataRange().getValues();
 
@@ -62,6 +71,7 @@ function generateMergeData(unNumberingList) {
 	return valueOfInputData;
 }
 
+//3,1はマジックナンバーなので修正
 //「【出力シート】請求書(明細別)」シートへ貼付
 function exportMergeData(mergeData) {
 	const outputDataInNumbering = getOutputDataInNumbering();
@@ -80,12 +90,8 @@ function exportNumberedSheet() {
 		if(unNumberingList.length >= 1) {
 		numberedSheet.getRange(lastRow + 1,1,unNumberingList.length,3).setValues(unNumberingList);
 		unNumberingListSheet.getRange(3,1,unNumberingList.length,3).clearContent();
-
 	}
-
-
 }
-
 
 //仕入先台帳へ反映
 function exportFormateData(unNumberingList) {
@@ -100,6 +106,8 @@ function exportFormateData(unNumberingList) {
 		arr.shift();
 	});
 
+
+	//i + 2はマジックナンバーなので変数を宣言してあげるように修正 
 	valueOfSupplierLedgerSheet.some((arr, i, self) => {
 		if(unNumberingList.length > 0 && self[i][2] === unNumberingList[0][0] - 1 ) {
 			supplierLedgerSheet.insertRows(i+2,unNumberingList.length);
