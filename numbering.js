@@ -4,8 +4,8 @@ function exportTriger() {
 	let unNumberingData = searchUnnumberedPerson();
 	unNumberingData = deleateDuplicate(unNumberingData);
 	let latestCustomId = findLatestCustomId();
-	let formatedData = formatData(unNumberingData, latestCustomId);
-	formatedData = compareNumbered(formatedData)
+	let formatedData = formatData(unNumberingData);
+	formatedData = compareNumbered(formatedData, latestCustomId)
 	exportUunumberingData(formatedData);
 }
 
@@ -44,7 +44,7 @@ function deleateDuplicate(unNumberingData) {
 }
 
 //「pasture表示名(請求元)」だけ抜き出し、加工する
-function formatData(unNumberingData, latestCustomId) {
+function formatData(unNumberingData) {
 	let tmp = [];
 	let formatedData = [];
 	const numberedList = getNumberedSheet().getDataRange().getValues();
@@ -52,20 +52,15 @@ function formatData(unNumberingData, latestCustomId) {
 	for (let i = 0; unNumberingData.length > i; i++) {
 		tmp.push(unNumberingData[i][11]);
 		tmp.push(unNumberingData[i][12]);
-		if (numberedList.length > 0) {
-			tmp.push(latestCustomId - numberedList.length + 1);
-		} else {
-			tmp.push(latestCustomId);
-		}
+    tmp.push(' ');
 		formatedData.push(tmp);
 		tmp = [];
-		latestCustomId++;
 	}
 	return formatedData;
 }
 
 //「採番済みリスト」と照合し、採番済みの人を除外する
-function compareNumbered(formatedData) {
+function compareNumbered(formatedData, latestCustomId) {
 	const numberedList = getNumberedSheet().getDataRange().getValues();
 	let deleateRows = [];
 
@@ -80,6 +75,12 @@ function compareNumbered(formatedData) {
 	for (let j = 0; deleateRows.length > j; j++) {
 		formatedData.splice(deleateRows[j] - j, 1)
 	}
+  
+  formatedData.forEach((arr, i) => {
+		formatedData[i][2] = latestCustomId;
+		latestCustomId++;
+	})
+
 
 	return formatedData;
 }
