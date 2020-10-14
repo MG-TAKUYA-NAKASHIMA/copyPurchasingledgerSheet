@@ -3,18 +3,31 @@
 function exportTriger() {
 	let unNumberingData = searchUnnumberedPerson();
 	unNumberingData = deleateDuplicate(unNumberingData);
-	let latestCustomId = findLatestCustomId();
-	let formatedData = formatData(unNumberingData);
+	let latestCustomId = findLatestCustomId(),
+	formatedData = formatData(unNumberingData);
 	formatedData = compareNumbered(formatedData, latestCustomId)
 	exportUunumberingData(formatedData);
 }
 
 //「請求書(明細別)データ入力」に記載された内容を削除する
-//マジックナンバー
 function deleteTrigerInInput() {
 	const inputDataInNumbering = getInputDataInNumbering();
-	let lastRow = inputDataInNumbering.getLastRow();
-	inputDataInNumbering.getRange(3, 1, lastRow, 44).clear();
+	let lastRow = inputDataInNumbering.getLastRow(),
+	lastCol     = inputDataInNumbering.getLastColumn()
+	inputDataInNumbering.getRange(3, 1, lastRow, lastCol).clear();
+}
+
+function errorCountTriger() {
+	const inputDataInNumbering = getInputDataInNumbering();
+	let lastRow = inputDataInNumbering.getLastRow(),
+	excelFunc = [];
+
+	for(let i = 3; lastRow >= i; i++) {
+		excelFunc.push([`=if(countif(C${i},"*テスト*")=1,"削除",if(B${i}=B${i - 1},"",if(D${i}="-","修正","")))`]);
+	}
+	Logger.log(excelFunc);
+	inputDataInNumbering.getRange(3, 1, lastRow - 2, 1).setValues(excelFunc);
+
 }
 
 
