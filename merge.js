@@ -71,27 +71,6 @@ function generateMergeData(unNumberingList) {
 	return valueOfInputData;
 }
 
-//3,1はマジックナンバーなので修正
-//「【出力シート】請求書(明細別)」シートへ貼付
-function exportMergeData(mergeData) {
-	const outputDataInNumbering = getOutputDataInNumbering();
-	outputDataInNumbering.getRange(3, 1, mergeData.length, mergeData[0].length).setValues(mergeData);
-}
-
-//「採番済みリスト」シートへの書き込み
-function exportNumberedSheet() {
-	
-		const numberedSheet = getNumberedSheet(),
-		lastRow = numberedSheet.getLastRow(),
-		unNumberingListSheet = getUnnumberingPersonSheetInNumbering();
-		let unNumberingList = unNumberingListSheet.getDataRange().getValues();
-		unNumberingList.shift();
-		unNumberingList.shift();
-		if(unNumberingList.length >= 1) {
-		numberedSheet.getRange(lastRow + 1,1,unNumberingList.length,3).setValues(unNumberingList);
-		unNumberingListSheet.getRange(3,1,unNumberingList.length,3).clearContent();
-	}
-}
 
 //仕入先台帳へ反映
 function exportFormateData(unNumberingList) {
@@ -117,3 +96,25 @@ function exportFormateData(unNumberingList) {
 	})
 }
 
+//「採番済みリスト」シートへの書き込み
+function exportNumberedSheet() {
+	
+		const numberedSheet = getNumberedSheet(),
+		lastRow = numberedSheet.getLastRow(),
+		unNumberingListSheet = getUnnumberingPersonSheetInNumbering();
+		let unNumberingList = unNumberingListSheet.getDataRange().getValues();
+		unNumberingList.shift();
+		unNumberingList.shift();
+		if(unNumberingList.length >= 1) {
+		numberedSheet.getRange(lastRow + 1,1,unNumberingList.length,3).setValues(unNumberingList);
+		unNumberingListSheet.getRange(3,1,unNumberingList.length,3).clearContent();
+	}
+}
+
+
+//3,1はマジックナンバーなので修正
+//「【出力シート】請求書(明細別)」シートへ貼付
+function exportMergeData(mergeData) {
+	const outputDataInNumbering = getOutputDataInNumbering();
+	outputDataInNumbering.getRange(3, 1, mergeData.length, mergeData[0].length).setValues(mergeData);
+}

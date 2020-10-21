@@ -1,84 +1,83 @@
 //「請求書（明細別）データ入力」で使用するスクリプト
 //「【入力シート】請求書(明細別)」シートの「カスタムID未割当者抽出」ボタンを押すと実行する
 function exportTriger() {
-	let unNumberingData = searchUnnumberedPerson();
-	unNumberingData = deleateDuplicate(unNumberingData);
-	let latestCustomId = findLatestCustomId(),
-	formatedData = formatData(unNumberingData);
-	formatedData = compareNumbered(formatedData, latestCustomId)
-	exportUunumberingData(formatedData);
+	let unNumberingData = searchUnnumberedPerson();//「【入力シート】請求書(明細別)」からカスタムIDが空欄の人を抽出する
+	unNumberingData = deleateDuplicate(unNumberingData);//「unNumberingData」の重複データを削除
+	let latestCustomId = findLatestCustomId(),//仕入先台帳から最新の仕入先codeを取得する
+	formatedData = formatData(unNumberingData);//採番済みリストと照合するために必要情報を抜き出す
+	formatedData = compareNumbered(formatedData, latestCustomId)//「採番済みリスト」と照合し、採番済みの人を除外する
+	exportUunumberingData(formatedData);//「カスタムID未採番者リスト」シートに貼付を行う
 }
 
 //「請求書(明細別)データ入力」に記載された内容を削除する
 function deleteTrigerInInput() {
 	const inputDataInNumbering = getInputDataInNumbering();
 	let lastRow = inputDataInNumbering.getLastRow(),
-	lastCol     = inputDataInNumbering.getLastColumn()
+	lastCol     = inputDataInNumbering.getLastColumn();
 	inputDataInNumbering.getRange(3, 1, lastRow, lastCol).clear();
 }
 
 function errorCountTriger() {
-	const inputDataInNumbering = getInputDataInNumbering();
-	let lastRow = inputDataInNumbering.getLastRow(),
-	excelFunc = [];
+	const inputDataInNumbering = getInputDataInNumbering();//「【入力シート】請求書(明細別)」シートを特定
+	let lastRow = inputDataInNumbering.getLastRow(),//「【入力シート】請求書(明細別)」のデータが存在する最終行を取得
+	excelFunc = [];//スプレッドシート関数を入れる配列を用意
 
-	for(let i = 3; lastRow >= i; i++) {
-		excelFunc.push([`=if(countif(C${i},"*テスト*")=1,"削除",if(B${i}=B${i - 1},"",if(D${i}="-","修正","")))`]);
+	for(let i = 3; lastRow >= i; i++) {//見出し行を省いたデータが存在する行に対して
+		excelFunc.push([`=if(countif(C${i},"*テスト*")=1,"削除",if(B${i}=B${i - 1},"",if(D${i}="-","修正","")))`]);//スプレッドシート関数を挿入
 	}
-	Logger.log(excelFunc);
-	inputDataInNumbering.getRange(3, 1, lastRow - 2, 1).setValues(excelFunc);
-
+	inputDataInNumbering.getRange(3, 1, lastRow - 2, 1).setValues(excelFunc);//3行目以降のデータが存在する行に出力
 }
 
 
 //「【入力シート】請求書(明細別)」に貼り付けられたデータの中からカスタムID未採番者を特定する
 //マジックナンバー
 function searchUnnumberedPerson() {
-	const valueOfInputData = getInputDataInNumbering().getDataRange().getValues();
-	let unNumberingData = [];
+	const inputData = getInputDataInNumbering(),//「【入力シート】請求書(明細別)」シートを特定
+	lastRow = inputData.getLastRow(),//「【入力シート】請求書(明細別)」のデータが存在する最終行を取得
+	lastCol = inputData.getLastColumn();//「【入力シート】請求書(明細別)」のデータが存在する最終列を取得
+	let valueOfInputData = inputData.getRange(3, 2, lastRow, lastCol).getValues();//見出し行を除いた「【入力シート】請求書(明細別)」のデータを全件取得
+	let unNumberingData = [];//カスタムIDが空欄の人を格納するための配列を用意
 
-	for (let i = 2; valueOfInputData.length > i; i++) {
-		if (valueOfInputData[i][13] === '') {
-			unNumberingData.push(valueOfInputData[i]);
+	for (let i = 2; valueOfInputData.length > i; i++) {//データ行数分だけ実行
+		if (valueOfInputData[i][13] === '') {//カスタムIDが空欄であれば
+			unNumberingData.push(valueOfInputData[i]);//unNumberingDataに行ごと挿入
 		}
 	}
-	return unNumberingData;
+	return unNumberingData;//unNumberingDataを戻す
 }
 
 //重複を削除する
 function deleateDuplicate(unNumberingData) {
-	unNumberingData = unNumberingData.filter(function (e, index) {
-		return !unNumberingData.some(function (e2, index2) {
+	unNumberingData = unNumberingData.filter((e, index) => {
+		return !unNumberingData.some((e2, index2) =>{
 			return index > index2 && e[12] == e2[12];
 		});
-
 	});
 	return unNumberingData;
 }
 
-//「pasture表示名(請求元)」だけ抜き出し、加工する
+//unNumberingDataからカスタムIDが空欄の人を配列[請求元id,請求元]だけ抜き出す
 function formatData(unNumberingData) {
-	let tmp = [];
-	let formatedData = [];
-	const numberedList = getNumberedSheet().getDataRange().getValues();
+	let tmp = [],
+	formatedData = [];
 
-	for (let i = 0; unNumberingData.length > i; i++) {
-		tmp.push(unNumberingData[i][11]);
-		tmp.push(unNumberingData[i][12]);
-    tmp.push(' ');
-		formatedData.push(tmp);
-		tmp = [];
+	for (let i = 0; unNumberingData.length > i; i++) {//unNumberingDataの数だけ下記を実行
+		tmp.push(unNumberingData[i][12]);//請求元IDを挿入する
+		tmp.push(unNumberingData[i][13]);//請求元名を挿入する
+    tmp.push(' ');//カスタムID用の空要素を挿入する
+		formatedData.push(tmp);//tmpをformatedDataに挿入する
+		tmp = [];//tmpを空にする
 	}
-	return formatedData;
+	return formatedData;//formatedDataを戻す
 }
 
 //「採番済みリスト」と照合し、採番済みの人を除外する
 function compareNumbered(formatedData, latestCustomId) {
-	const numberedList = getNumberedSheet().getDataRange().getValues();
-	let deleateRows = [];
+	const numberedList = getNumberedSheet().getDataRange().getValues();//「採番済みリスト」シートデータを全件取得
+	let deleateRows = [];//削除する行数を格納する配列
 
-	for (let i = 0; formatedData.length > i; i++) {
-		for (let c = 1; numberedList.length > c; c++) {
+	for (let i = 0; formatedData.length > i; i++) {//formatedDataの数だけ下記を実行
+		for (let c = 1; numberedList.length > c; c++) {//numberedListの数だけ下記を実行
 			if (formatedData[i][0] === numberedList[c][0]) {
 				deleateRows.push(i);
 			}
@@ -93,7 +92,6 @@ function compareNumbered(formatedData, latestCustomId) {
 		formatedData[i][2] = latestCustomId;
 		latestCustomId++;
 	})
-
 
 	return formatedData;
 }
