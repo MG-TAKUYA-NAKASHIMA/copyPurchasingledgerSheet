@@ -12,7 +12,7 @@ function deleteTrigerInInput() {
 	const inputDataInNumbering = getInputDataInNumbering();//「【入力シート】請求書(明細別)」シートを特定
 	let lastRow = inputDataInNumbering.getLastRow(),//「【入力シート】請求書(明細別)」シートのデータが存在する最終行を取得
 	lastCol     = inputDataInNumbering.getLastColumn();//「【入力シート】請求書(明細別)」シートのデータが存在する最終列を取得
-	inputDataInNumbering.getRange(3, 1, lastRow, lastCol).clear();//「【入力シート】請求書(明細別)」シートの先頭2行を除いたすべてのデータを削除
+	inputDataInNumbering.getRange(3, 1, lastRow, lastCol).clearContent();//「【入力シート】請求書(明細別)」シートの先頭2行を除いたすべてのデータを削除
 }
 
 function errorCountTriger() {
