@@ -15,21 +15,10 @@ function deleteTrigerInInput() {
 	inputDataInNumbering.getRange(3, 1, lastRow, lastCol).clearContent();//「【入力シート】請求書(明細別)」シートの先頭2行を除いたすべてのデータを削除
 }
 
-function errorCountTriger() {
-	const inputDataInNumbering = getInputDataInNumbering();//「【入力シート】請求書(明細別)」シートを特定
-	let lastRow = inputDataInNumbering.getLastRow(),//「【入力シート】請求書(明細別)」のデータが存在する最終行を取得
-	excelFunc = [];//スプレッドシート関数を入れる配列を用意
-
-	for(let i = 3; lastRow >= i; i++) {//見出し行を省いたデータが存在する行に対して
-		excelFunc.push([`=if(countif(C${i},"*テスト*")=1,"削除",if(B${i}=B${i - 1},"",if(D${i}="-","修正","")))`]);//スプレッドシート関数を挿入
-	}
-	inputDataInNumbering.getRange(3, 1, lastRow - 2, 1).setValues(excelFunc);//3行目以降のデータが存在する行に出力
-}
-
 //「【入力シート】請求書(明細別)」に貼り付けられたデータの中からカスタムID未採番者を特定する
 //マジックナンバー
 function searchBlankPerson() {
-	const valueOfInputData = getInputDataInNumbering().getDataRange().getValues();//見出し行を除いた「【入力シート】請求書(明細別)」のデータを全件取得
+	const valueOfInputData = getInputDataInNumbering().getDataRange().getValues();//「【入力シート】請求書(明細別)」のデータを全件取得
 	let blankPersons = [],//カスタムIDが空欄の人を格納するための配列を用意
 	tmp = [];//2次元配列を作成するための一時的なデータ保管変数
 
@@ -108,4 +97,3 @@ function findLatestCustomId() {
 	});
 	return latestCustomId;
 }
-
